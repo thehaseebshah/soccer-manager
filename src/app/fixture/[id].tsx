@@ -288,7 +288,8 @@ export default function FixtureScreen() {
               .sort((a, b) => b.mins - a.mins)
               .map(({ p, mins }) => {
                 const pct = mins / f.matchMinutes;
-                const under = pct < club.minMinutesPct / 100 - 1e-6;
+                // one minute of slack: a substitution made a few seconds late should not read as a breach
+                const under = mins + 1 < (club.minMinutesPct / 100) * f.matchMinutes;
                 const before = priorMinutes[p.id] ?? 0;
                 return (
                   <View key={p.id} style={{ gap: 3 }}>

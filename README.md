@@ -39,6 +39,22 @@ On first launch, create a club or tap **Load demo club** for a populated semi-pr
 - `src/ui/` — design kit, charts, pitch.
 - `src/app/` — Expo Router screens (`(tabs)` = Home, Squad, Matchday, Finance, Develop).
 
+## Presentation kit
+
+`docs/presentation/` holds a ready-to-present kit: a speaker script (`PRESENTATION_SCRIPT.md`), four silent demo
+clips plus a combined one (`media/video/`), clean 2x screenshots (`media/screens/`) and framed stills
+(`media/framed/`). Everything is the real app running with the built-in demo club; the match clock is
+fast-forwarded in the live-match clip and says so on screen.
+
+To regenerate the media (needs Playwright with Chromium and ffmpeg):
+
+```bash
+npm run build:web
+node demo/serve.js &                                   # serves dist/ and the phone frame on :8081
+NODE_PATH=$(npm root -g) node demo/record.js /tmp/gaffer-media
+NODE_PATH=$(npm root -g) node demo/screenshots.js /tmp/gaffer-media/screens
+```
+
 ## Known limits
 
 - **Data is local-first.** There is no account system or cloud sync yet; use Settings → Export / Restore
