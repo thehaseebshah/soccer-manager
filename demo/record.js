@@ -229,7 +229,7 @@ async function planNextMatch(ctx) {
     await glide(vis(app.getByText('Squad profile')));
     await hold(4000);
     await tap(tab('Squad'), 800);
-    await tap(vis(app.getByText('Jordan Blake')), 1000);
+    await tap(vis(app.getByText(/^\d+\. Jordan Blake$/)), 1000);
     await caption('Scene 4 · A player profile', 'Minutes, skills and contract together', 'One profile for the coach and the owner: playing time, development trend and contract status.');
     await still('develop-2-profile');
     await hold(3500);

@@ -77,7 +77,7 @@ async function session(browser, viewport, fn, clock = false) {
     await tab('Develop').click();
     await snap('10-develop-full');
     await tab('Squad').click();
-    await vis(page.getByText('Jordan Blake')).click();
+    await vis(page.getByText(/^\d+\. Jordan Blake$/)).click();
     await btn('Observation').waitFor();
     await snap('11-player-profile');
     await page.goto(BASE + '/scenario');

@@ -129,7 +129,7 @@ main{padding-block:32px 72px;display:grid;gap:40px}
 .panel.two{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:28px}
 .checks{list-style:none;padding:0!important;display:grid;gap:10px}
 .checks label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
-.checks input{margin-top:5px;width:18px;height:18px;accent-color:var(--accent)}
+.checks input{margin-top:5px;width:18px;height:18px;flex:none;accent-color:var(--accent)}
 .act{display:grid;gap:18px;scroll-margin-top:72px}
 .acthead{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
 .time{font-family:var(--mono);display:grid;gap:2px;text-align:left;border-left:4px solid var(--accent);padding-left:12px;min-width:76px}

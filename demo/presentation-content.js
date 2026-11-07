@@ -12,7 +12,7 @@ module.exports = {
 
   howToUse: [
     'Each section below has three parts: what to do on screen, what to say, and the media to show.',
-    'The four demo clips are silent. Play them full screen and speak over them, using the “Say” text as your guide. Pause any clip to take a question.',
+    'The four demo clips are silent. Play them full screen and speak over them, using the “What to say” text as your guide. Pause any clip to take a question.',
     'Everything in the clips is the real app running in a browser, using the built-in demo club. The names, results and contracts are simulated.',
     'Where a clip fast-forwards the match clock, the clip says so on screen.',
   ],
