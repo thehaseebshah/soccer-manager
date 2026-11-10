@@ -5,10 +5,14 @@
 > Audience: CEO review and investor-style demo. About 11 min + questions. 5:04 of demo clips, 18 screenshots.
 >
 > The same content, with the videos playable inline, is published as a web page. This file is the copy that lives with the code.
+>
+> Second screen: open `media.html` (next to this file) in a browser on your other display. It shows any clip or image full size, with keyboard shortcuts. In the published web page, every section has an “Open on second screen” button.
 
 ## How to use this
 
-- Each section below has three parts: what to do on screen, what to say, and the media to show.
+- Use two screens. Keep this script on one. Click “Open media screen” at the top on the other. It plays any clip or image full size.
+- Each section has an “Open on second screen” button that jumps to the right clip or image. Keyboard: Space plays or pauses, 1 to 4 pick Demo 1 to 4, 0 the full demo, arrow keys step through everything, F goes full screen.
+- Each section has three parts: what to do on screen, what to say, and the media to show.
 - The four demo clips are silent. Play them full screen and speak over them, using the “What to say” text as your guide. Pause any clip to take a question.
 - Everything in the clips is the real app running in a browser, using the built-in demo club. The names, results and contracts are simulated.
 - Where a clip fast-forwards the match clock, the clip says so on screen.

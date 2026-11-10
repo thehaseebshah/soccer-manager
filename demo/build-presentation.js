@@ -12,9 +12,13 @@ const arg = (n) => {
 const MEDIA = path.resolve(arg('media') || 'docs/presentation/media');
 const HTML_OUT = arg('html');
 const MD_OUT = arg('md');
+const MEDIA_HTML_OUT = arg('media-html');
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const rel = (f) => `media/${f}`;
+const hashOf = (m) => (m.type === 'video' ? m.key : path.basename(m.file, path.extname(m.file)));
+const screenUrl = (id) => `media.html#${id}`;
+const NEWTAB = 'target="_blank" rel="noopener"';
 
 function duration(file) {
   try {
@@ -51,11 +55,12 @@ function mediaHtml(m) {
     const v = vids[m.key];
     return `<figure class="media">
   <video id="v-${m.key}" controls preload="metadata" playsinline poster="${rel(v.poster)}"><source src="${rel(v.file)}" type="video/mp4"></video>
-  <figcaption><span>${esc(v.title)} · ${mmss(v.secs)}</span><a href="${rel(v.file)}" target="_blank" rel="noopener">Open file</a></figcaption>
+  <figcaption><span>${esc(v.title)} · ${mmss(v.secs)}</span></figcaption>
+  <div class="openrow"><a class="btn" href="${screenUrl(m.key)}" ${NEWTAB}>Open on second screen ↗</a><a class="btn ghost" href="${rel(v.file)}" ${NEWTAB}>Video file ↗</a></div>
 </figure>`;
   }
   if (m.type === 'image') {
-    return `<figure class="media"><a href="${rel(m.file)}" target="_blank" rel="noopener"><img src="${rel(m.file)}" alt="${esc(m.caption)}" loading="lazy"></a><figcaption><span>${esc(m.caption)}</span><a href="${rel(m.file)}" target="_blank" rel="noopener">Open image</a></figcaption></figure>`;
+    return `<figure class="media"><a href="${screenUrl(hashOf(m))}" ${NEWTAB}><img src="${rel(m.file)}" alt="${esc(m.caption)}" loading="lazy"></a><figcaption><span>${esc(m.caption)}</span></figcaption><div class="openrow"><a class="btn" href="${screenUrl(hashOf(m))}" ${NEWTAB}>Open on second screen ↗</a><a class="btn ghost" href="${rel(m.file)}" ${NEWTAB}>Image file ↗</a></div></figure>`;
   }
   const head = m.head.map((h) => `<th scope="col">${esc(h)}</th>`).join('');
   const rows = m.rows.map((r) => `<tr>${r.map((c, i) => (i === 0 ? `<th scope="row">${esc(c)}</th>` : `<td>${esc(c)}</td>`)).join('')}</tr>`).join('');
@@ -78,7 +83,7 @@ function actHtml(a, i) {
 </section>`;
 }
 
-const nav = C.acts.map((a) => `<a href="#${a.id}">${esc(a.title.replace(/^Demo \d: /, 'Demo: '))}</a>`).join('') + '<a href="#questions">Questions</a><a href="#appendix">Appendix</a>';
+const nav = `<a class="navmedia" href="${screenUrl('full')}" ${NEWTAB}>Media screen ↗</a>` + C.acts.map((a) => `<a href="#${a.id}">${esc(a.title.replace(/^Demo \d: /, 'Demo: '))}</a>`).join('') + '<a href="#questions">Questions</a><a href="#appendix">Appendix</a>';
 
 const html = `<title>Gaffer Presenter Script</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -152,6 +157,15 @@ th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px sol
 thead th{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 tbody th{font-weight:700}
 tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+.openrow{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px}
+.btn{display:inline-block;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14px;padding:9px 14px;border-radius:9px;text-decoration:none;border:1px solid var(--accent)}
+.btn.ghost{background:transparent;color:var(--accent);border-color:var(--line)}
+.btn:hover{filter:brightness(1.08)}
+.ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.ctas .cta{margin-top:0}
+.cta.ghost{background:transparent;color:var(--pitch-ink);border:1px solid rgba(234,244,238,.45)}
+nav.toc a.navmedia{background:var(--accent);color:var(--accent-ink)}
+nav.toc a.navmedia:hover{background:var(--accent);color:var(--accent-ink);filter:brightness(1.1)}
 .do{background:var(--do);color:var(--do-ink);border:1px solid var(--do-line);border-radius:12px;padding:14px 18px}
 .do .label{color:var(--do-ink)}
 .do ul{margin:0;padding-left:20px;display:grid;gap:4px}
@@ -182,7 +196,7 @@ code{font-family:var(--mono);font-size:.92em}
   <h1>${esc(C.title)}</h1>
   <p class="sub">${esc(C.tagline)}</p>
   <div class="chips"><span class="chip">${esc(C.audience)}</span><span class="chip">${runtimeLabel}</span><span class="chip">${clipTotal ? mmss(clipTotal) : '—'} of demo clips</span><span class="chip">${shotCount} screenshots</span></div>
-  <a class="cta" href="#full">Play the full demo</a>
+  <div class="ctas"><a class="cta" href="${screenUrl('full')}" ${NEWTAB}>Open media screen ↗</a><a class="cta ghost" href="#full">Play the full demo here</a></div>
 </div></header>
 <nav class="toc" aria-label="Sections"><div class="wrap">${nav}</div></nav>
 
@@ -196,7 +210,8 @@ code{font-family:var(--mono);font-size:.92em}
     <h2>The whole demo in one file</h2>
     <figure class="media">
       <video id="v-full" controls preload="metadata" playsinline poster="${rel(vids.full.poster)}"><source src="${rel(vids.full.file)}" type="video/mp4"></video>
-      <figcaption><span>${esc(vids.full.title)} · ${mmss(vids.full.secs)} · silent, narrate from the script below</span><a href="${rel(vids.full.file)}" target="_blank" rel="noopener">Open file</a></figcaption>
+      <figcaption><span>${esc(vids.full.title)} · ${mmss(vids.full.secs)} · silent, narrate from the script below</span></figcaption>
+      <div class="openrow"><a class="btn" href="${screenUrl('full')}" ${NEWTAB}>Open on second screen ↗</a><a class="btn ghost" href="${rel(vids.full.file)}" ${NEWTAB}>Video file ↗</a></div>
     </figure>
   </section>
 
@@ -209,8 +224,8 @@ ${C.acts.map(actHtml).join('\n')}
 
   <section class="sec" id="appendix">
     <h2>Appendix</h2>
-    <div class="panel" style="margin-bottom:24px"><h3 class="label">Screenshots (open any image at full size)</h3>
-      <div class="gallery">${C.gallery.map(([f, c]) => `<figure><a href="${rel(f)}" target="_blank" rel="noopener"><img src="${rel(f)}" alt="${esc(c)}" loading="lazy"></a><figcaption>${esc(c)}</figcaption></figure>`).join('')}</div>
+    <div class="panel" style="margin-bottom:24px"><h3 class="label">Screenshots (click to open on the second screen)</h3>
+      <div class="gallery">${C.gallery.map(([f, c]) => `<figure><a href="${screenUrl(path.basename(f, '.png'))}" ${NEWTAB}><img src="${rel(f)}" alt="${esc(c)}" loading="lazy"></a><figcaption>${esc(c)}</figcaption></figure>`).join('')}</div>
     </div>
     <div class="panel two" style="margin-bottom:24px">
       <div><h3 class="label">What we did, start to finish</h3><ol class="timeline" style="padding:0">${C.recap.map((r) => `<li><b>${esc(r.phase)}</b><span>${esc(r.what)}</span></li>`).join('')}</ol></div>
@@ -258,6 +273,8 @@ const md = `# ${C.title}: ${C.subtitle}
 > Audience: ${C.audience}. ${runtimeLabel[0].toUpperCase() + runtimeLabel.slice(1)}. ${mmss(clipTotal)} of demo clips, ${shotCount} screenshots.
 >
 > The same content, with the videos playable inline, is published as a web page. This file is the copy that lives with the code.
+>
+> Second screen: open \`media.html\` (next to this file) in a browser on your other display. It shows any clip or image full size, with keyboard shortcuts. In the published web page, every section has an “Open on second screen” button.
 
 ## How to use this
 
@@ -325,6 +342,147 @@ Code: ${C.repo}
 \`npm install\` then \`npm run web\`, then tap "Load demo club". The recordings are reproducible with the scripts in \`demo/\`: start the server (\`node demo/serve.js\`), then run \`demo/record.js\` and \`demo/screenshots.js\` with Playwright installed.
 `;
 
+
+// ------------------------------------------------------------------ second-screen media page (a full standalone document)
+function mediaScreenHtml() {
+  const items = [];
+  for (const k of ['full', 'fairness', 'live', 'owner', 'develop']) {
+    const v = vids[k];
+    items.push({ id: k, type: 'video', group: 'Demo clips', title: v.title, meta: mmss(v.secs), src: rel(v.file), poster: rel(v.poster) });
+  }
+  for (const [f, c] of C.gallery) items.push({ id: path.basename(f, '.png'), type: 'image', group: 'Screenshots', title: c, meta: 'screenshot', src: rel(f) });
+  const framedDir = path.join(MEDIA, 'framed');
+  const framed = fs.existsSync(framedDir) ? fs.readdirSync(framedDir).filter((x) => x.endsWith('.png')).sort() : [];
+  const pretty = (n) => n.replace(/\.png$/, '').replace(/^(\w+)-(\d)-/, (_, a, b) => `${a[0].toUpperCase() + a.slice(1)} ${b}: `).replace(/-/g, ' ');
+  for (const f of framed) items.push({ id: f.replace(/\.png$/, ''), type: 'image', group: 'Phone-framed stills', title: pretty(f), meta: 'still', src: rel(`framed/${f}`) });
+  const data = JSON.stringify(items).replace(/</g, '\\u003c');
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gaffer Media Screen</title>
+<style>
+:root{color-scheme:dark;--bg:#070E0A;--panel:#0E1A13;--line:#1F3328;--ink:#E8F0EA;--muted:#93A89A;--accent:#2BC27C;--accent-ink:#04160D}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:grid;grid-template-columns:320px minmax(0,1fr);overflow:hidden}
+aside{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px 24px}
+aside h1{font-size:15px;letter-spacing:.14em;text-transform:uppercase;margin:4px 8px 4px;color:var(--accent)}
+aside p.hint{margin:0 8px 14px;color:var(--muted);font-size:13px;line-height:1.45}
+aside h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:18px 8px 6px}
+.list{display:grid;gap:4px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;text-align:left;width:100%;background:transparent;color:var(--ink);border:1px solid transparent;border-radius:10px;padding:9px 10px;font:inherit;font-size:14px;cursor:pointer}
+.item:hover{background:#13241A}
+.item[aria-current="true"]{background:#16301F;border-color:var(--accent)}
+.item .key{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent-ink);background:var(--accent);border-radius:5px;min-width:20px;text-align:center;padding:1px 5px}
+.item .key.none{background:#1F3328;color:var(--muted)}
+.item .meta{color:var(--muted);font-size:12px}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px}
+.thumb{padding:0;border:2px solid transparent;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;aspect-ratio:1/1.5}
+.thumb img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.thumb[aria-current="true"]{border-color:var(--accent)}
+.thumbs.wide{grid-template-columns:repeat(2,1fr)}
+.thumbs.wide .thumb{aspect-ratio:16/10}
+main{display:grid;grid-template-rows:auto minmax(0,1fr) auto;min-width:0;height:100vh}
+header.bar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--line)}
+header.bar h2{margin:0;font-size:18px}
+header.bar .sub{color:var(--muted);font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button,.actions a{background:#16301F;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.actions button:hover,.actions a:hover{border-color:var(--accent)}
+#stage{display:flex;align-items:center;justify-content:center;padding:16px;min-height:0;background:#000}
+#stage video,#stage img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;border-radius:6px}
+footer.keys{padding:9px 20px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+kbd{font-family:ui-monospace,Menlo,monospace;background:#16301F;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (max-width:860px){body{grid-template-columns:1fr;grid-template-rows:auto 1fr;overflow:auto;height:auto}aside{border-right:0;border-bottom:1px solid var(--line);max-height:38vh}main{height:auto;min-height:70vh}#stage{min-height:50vh}}
+</style></head>
+<body>
+<aside aria-label="Media list">
+  <h1>Gaffer media screen</h1>
+  <p class="hint">Keep the script on your other screen. Pick a clip or image here, or use the keyboard.</p>
+  <div id="lists"></div>
+</aside>
+<main>
+  <header class="bar"><div><h2 id="title">Loading</h2><div class="sub" id="sub"></div></div>
+    <div class="actions"><button id="fs" type="button">Full screen (F)</button><a id="file" href="#" target="_blank" rel="noopener">Open file ↗</a></div></header>
+  <div id="stage" aria-live="polite"></div>
+  <footer class="keys"><kbd>Space</kbd> play or pause · <kbd>0</kbd> full demo · <kbd>1</kbd>–<kbd>4</kbd> demos 1 to 4 · <kbd>←</kbd> <kbd>→</kbd> previous or next · <kbd>F</kbd> full screen · clips have no sound, so narrate over them</footer>
+</main>
+<script>
+(function(){
+  var ITEMS=${data};
+  var cur=0, stage=document.getElementById('stage');
+  var groups=[]; ITEMS.forEach(function(it){ if(groups.indexOf(it.group)<0) groups.push(it.group); });
+  var lists=document.getElementById('lists'), nodes={};
+  groups.forEach(function(g){
+    var h=document.createElement('h2'); h.textContent=g; lists.appendChild(h);
+    var wrap=document.createElement('div');
+    var isVid=g==='Demo clips';
+    wrap.className=isVid?'list':'thumbs'+(g==='Phone-framed stills'?' wide':'');
+    ITEMS.forEach(function(it,i){
+      if(it.group!==g) return;
+      var b=document.createElement('button'); b.type='button'; b.setAttribute('data-i',i);
+      if(isVid){
+        b.className='item';
+        var k=document.createElement('span'); k.className='key'; k.textContent=it.id==='full'?'0':String(ITEMS.filter(function(x){return x.group===g&&x.id!=='full';}).indexOf(it)+1); b.appendChild(k);
+        var t=document.createElement('span'); t.textContent=it.title; b.appendChild(t);
+        var m=document.createElement('span'); m.className='meta'; m.textContent=it.meta; b.appendChild(m);
+      } else {
+        b.className='thumb'; b.title=it.title; b.setAttribute('aria-label',it.title);
+        var im=document.createElement('img'); im.src=it.src; im.alt=''; im.loading='lazy'; b.appendChild(im);
+      }
+      b.addEventListener('click',function(){ select(i,true); });
+      nodes[i]=b; wrap.appendChild(b);
+    });
+    lists.appendChild(wrap);
+  });
+  function select(i,push){
+    if(i<0||i>=ITEMS.length) return;
+    cur=i; var it=ITEMS[i];
+    Object.keys(nodes).forEach(function(k){ nodes[k].setAttribute('aria-current', String(+k===i)); });
+    stage.innerHTML='';
+    var el;
+    if(it.type==='video'){ el=document.createElement('video'); el.controls=true; el.playsInline=true; el.preload='auto'; el.poster=it.poster||''; el.src=it.src; }
+    else { el=document.createElement('img'); el.src=it.src; el.alt=it.title; }
+    stage.appendChild(el);
+    document.getElementById('title').textContent=it.title;
+    document.getElementById('sub').textContent=it.type==='video'?('Video · '+it.meta+' · no audio'):'Image';
+    var f=document.getElementById('file'); f.href=it.src;
+    document.title=it.title+' · Gaffer media screen';
+    if(push){ try{ history.replaceState(null,'','#'+it.id); }catch(e){ location.hash=it.id; } }
+    if(nodes[i] && nodes[i].className.indexOf('thumb')===0 && nodes[i].scrollIntoView) nodes[i].scrollIntoView({block:'nearest'});
+  }
+  function fromHash(){
+    var id=(location.hash||'').replace('#','');
+    for(var i=0;i<ITEMS.length;i++){ if(ITEMS[i].id===id){ select(i,false); return; } }
+    select(0,false);
+  }
+  function toggleFs(){
+    var d=document, el=stage;
+    if(d.fullscreenElement){ d.exitFullscreen(); } else if(el.requestFullscreen){ el.requestFullscreen().catch(function(){}); }
+  }
+  document.getElementById('fs').addEventListener('click',toggleFs);
+  window.addEventListener('hashchange',fromHash);
+  window.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    var v=stage.querySelector('video');
+    if(e.key===' '||e.code==='Space'){ if(v){ e.preventDefault(); if(v.paused) v.play(); else v.pause(); } }
+    else if(e.key==='ArrowRight'){ select((cur+1)%ITEMS.length,true); }
+    else if(e.key==='ArrowLeft'){ select((cur-1+ITEMS.length)%ITEMS.length,true); }
+    else if(e.key==='f'||e.key==='F'){ toggleFs(); }
+    else if(e.key==='0'){ select(0,true); }
+    else if(/^[1-4]$/.test(e.key)){ select(+e.key,true); }
+  });
+  fromHash();
+})();
+</script>
+</body></html>
+`;
+}
+
+if (MEDIA_HTML_OUT) {
+  fs.writeFileSync(MEDIA_HTML_OUT, mediaScreenHtml());
+  console.log('wrote', MEDIA_HTML_OUT);
+}
 if (HTML_OUT) {
   fs.mkdirSync(path.dirname(HTML_OUT), { recursive: true });
   fs.writeFileSync(HTML_OUT, html);
